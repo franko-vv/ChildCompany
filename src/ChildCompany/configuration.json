@@ -1,0 +1,5 @@
+﻿{
+  "DataConnection": {
+    "ConnectionString": "Server=.\\SQLEXPRESS;Database=ChildCompanyDb;Trusted_Connection=True;MultipleActiveResultSets=true"
+  }
+}

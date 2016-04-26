@@ -7,7 +7,7 @@
 
     angular.module("app", []).controller("companyController", companyController);
 
-    function companyController($scope, $http, concatArrayService) {
+    function companyController($scope, $http, arrayService) {
 
         /*var vm = this;*/
 
@@ -22,9 +22,6 @@
 
         $scope.toggleTable = true;
         $scope.toggleTree = false;
-
-
-        console.log("I AM HERE");
 
         // REFRESH VIEW
         // GET ARRAY COMPANIES AND COPY TO TEMPORARY ARRAY TO DELETE ROOT COMPANY
@@ -47,9 +44,14 @@
         // CALL METHOD WHEN FIRST TIME RUN
         refresh();
 
+        // Create multiarray
+        var buildTree = function () {
+            $scope.roots = arrayService.createMultiArray($scope.companiesAllInfo);
+        };
 
-        // BUILT COMPANY TREE
-        $scope.buildTree = function () {
+        // BUILT COMPANY TREE - Build multiarray
+        /*var buildTree = function ()
+        {
             if ($scope.companiesAllInfo == null) return;
             var map = {}, node, roots = [];
             for (var i = 0; i < $scope.companiesAllInfo.length; i += 1) {
@@ -62,7 +64,7 @@
                     roots.push(node);
             }
             $scope.roots = roots;
-        };
+        };*/
 
         var calculateChild = function () {
             for (var i = 0; i <= arrayCompanies.length - 1; i++) {
@@ -91,9 +93,8 @@
         };
 
         var concat = function () {
-            // Concatinate ChildMoney from moneyChildDict to Companies Array from GET req 
-            
-            $scope.companiesAllInfo = concatArrayService.concatTwoArray(arrayCompanies, moneyChildDict, "id", "id", function (a, b) {
+            // Concatinate ChildMoney from moneyChildDict to Companies Array from GET req
+            $scope.companiesAllInfo = arrayService.concatTwoArray(arrayCompanies, moneyChildDict, "id", "id", function (a, b) {
                 return {
                     id: a.id,
                     name: a.name,
@@ -139,7 +140,7 @@
 			        $scope.company = {};
 			        // build tree
 			        refresh();
-			        $scope.buildTree();
+			        buildTree();
 			    }, function (err) {
 			        $scope.errorMessage = err.data;
 			    }).finally(function () {
@@ -170,7 +171,7 @@
             console.log($scope.changedCompany);
 
             //Get current item
-            var item = getItemByIdFromArray(arrayCompanies, id);
+            var item = getItemByIdService.getItem(arrayCompanies, id, id);
             var index = arrayCompanies.indexOf(item);
 
             $http.put('/companies/' + id, $scope.changedCompany)
@@ -181,7 +182,7 @@
 			        arrayCompanies[index].name = $scope.changedCompany.name;
 			        calculateChild();
 			        concat();
-			        $scope.buildTree();
+			        buildTree();
 			        $scope.changedCompany = {};
 			    }, function (err) {
 			        $scope.errorMessage = err.data;
@@ -192,15 +193,15 @@
 
         var updateChildCompanies = function (id, parentId) {
             // IF DELETED ELEMENT HAS CHILDREN SET THEIR PARENTID TO LEVEL UP (DELETED ELEMENT PARENTID)
-            var childElement = [];
+            var childElementId = [];
             for (var i = currentParentTable.length - 1; i >= 0; i--) {
                 // find children
                 if (currentParentTable[i].parentId === id)
-                    childElement.push(currentParentTable[i].id);
+                    childElementId.push(currentParentTable[i].id);
             };
-            for (var i = childElement.length - 1; i >= 0; i--) {
+            for (var i = childElementId.length - 1; i >= 0; i--) {
                 // Set new parentId for child companies
-                var newItem = getItemByIdFromArray(arrayCompanies, childElement[i]);
+                var newItem = getItemByIdService.getItem(arrayCompanies, id, childElementId[i]);
                 newItem.parentId = parentId;
                 // Update child
                 $http.put('/companies/' + newItem.id, newItem)
@@ -243,7 +244,7 @@
             if ($scope.toggleTree) return;
             $scope.toggleTable = false;
             $scope.toggleTree = true;
-            $scope.buildTree();
+            buildTree();
         };
 
         // Value into input forms
@@ -263,12 +264,12 @@
 
         //////////////////////////////////////////////////////////////////////////////////////////
         // CONCAT TWO ARRAYS
-        var getItemByIdFromArray = function (globalArr, id) {
+       /* var getItemByIdFromArray = function (globalArr, prop, id) {
             for (var i = globalArr.length - 1; i >= 0; i--) {
-                if (globalArr[i].id === id)
+                if (globalArr[i].prop === id)
                     return globalArr[i];
             };
-        };
+        };*/
 
         // Check if array contains element by _id
         Array.prototype.contains = function (obj) {

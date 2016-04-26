@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ChildCompany.Models;
 using Microsoft.Data.Entity;
+using Newtonsoft.Json.Serialization;
 
 namespace ChildCompany
 {
@@ -29,13 +30,22 @@ namespace ChildCompany
         public void ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
-            services.AddMvc();
+            services.AddMvc(config =>
+            {
+#if !DEBUG
+                config.Filters.Add(new RequireHttpsAttribute());
+#endif
+            })
+            .AddJsonOptions(opt =>
+            {
+                opt.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            });
 
             services.AddEntityFramework()
                     .AddSqlServer()
-                    .AddDbContext<CompanyContext>(opt=> {
-                        opt.UseSqlServer(Configuration["DataConnection:ConnectionString"]);
-                    });
+                    .AddDbContext<DAL.EntityFramework.EFCompanyContext>();
+
+            services.AddScoped<DAL.EntityFramework.IUnitOfWork, DAL.Repository.UnitOfWork>();
 
             services.AddTransient<SeedData>();
         }

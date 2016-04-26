@@ -1,0 +1,130 @@
+﻿<div class="row">
+    <div class="col-md-6 col-lg-6 col-sm-6 toggle">
+        <a ng-click="showTable()"><button class="btn btn-block">TABLE</button></a>
+    </div>
+    <div class="col-md-6 col-lg-6 col-sm-6 toggle">
+        <a ng-click="showTree()"><button class="btn btn-block">TREE</button></a>
+    </div>
+</div>
+
+<div ng-if="toggleTable">
+    <DIV class="container">
+        <h1 class="text text-center">COMPANIES LIST</h1>
+        <hr class="styleHR">
+
+        <div ng-show="isLoading" class="text-center loading"><i class="fa fa-spinner fa-spin"></i> Loading...</div>
+        <div class="alert alert-danger" ng-show="errorMessage">{{ errorMessage }}</div>
+
+        <!--ADD NEW COMPANY-->
+        <table class="table table-responsive">
+            <thead>
+                <tr>
+                    <th>Parent</th>
+                    <th>Name</th>
+                    <th>Own Money</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th>
+                        <div class="dropdown">
+                            <select name="ParentId" ng-model="company.ParentId">
+                                <option ng-repeat="node in companiesAllInfo" value="{{ node._id }}"> {{ node.Name }}</option>
+                            </select>
+                        </div>
+                    </th>
+                    <th><input class="form-control" ng-model="company.Name" /></th>
+                    <th><input class="form-control" type="number" step="0.01" ng-model="company.OwnMoney" /></th>
+                    <th><button class="btn btn-primary" ng-click="addChildCompany(company.ParentId, company)">Add New Company</button></th>
+                    <th><button class="btn btn-warning" ng-click="updateCompany(company._id)">Update Company</button></th>
+                </tr>
+            </tbody>
+        </table>
+
+        <hr class="styleHR">
+        <!--LIST-->
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Own Money</th>
+                    <th>Child Money</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="company in companiesAllInfo">
+                    <td>{{company.Name}}</td>
+                    <td>{{company.OwnMoney}}</td>
+                    <td>{{company.ChildMoney}}</td>
+                    <td class="editCompany">
+                        <button class="btn btn-info" ng-click="editCompany(company._id)">
+                            <i class="fa fa-pencil-square-o"></i>
+                        </button>
+                    </td>
+                    <td class="deleteCompany">
+                        <button class="btn btn-danger" ng-really-message="Are you sure to delete company {{company.Name}} ?" ng-really-click="deleteCompany(company._id, company.ParentId)">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <hr class="styleHR">
+    </DIV>
+</div>
+
+<div class="container" ng-if="toggleTree">
+
+    <div class="row">
+        <h1 class="text text-center">COMPANIES TREE</h1>
+        <hr class="styleHR">
+
+        <div ng-show="isLoading" class="text-center loading"><i class="fa fa-spinner fa-spin"></i> Loading...</div>
+        <div class="alert alert-danger" ng-show="errorMessage">{{ errorMessage }}</div>
+
+        <!--Build company tree-->
+        <div class="treecolor">
+            <script type="text/ng-template" id="categoryTree">
+
+                <div class="row red" id={{node._id}}>
+                    <div class="col-md-10 col-lg-10" ng-hide="editedItems[node._id]">
+                        <h3>{{  node.Name  }}</h3>
+                        <h4>Company Money - {{  node.OwnMoney  }} $</h4>
+                        <h4>Child company money - {{  node.ChildMoney  }} $</h4>
+                        <a href="#" ng-click="openEditMode(node)"><i class="fa fa-pencil-square-o editCompany"></i></a>
+                    </div>
+
+                    <div class="col-md-10 col-lg-10" ng-show="editedItems[node._id]">
+                        <h3>Company Name: </h3><input class="input" ng-model="changedCompany.Name">
+                        <h4>Company Money: </h4><input type="number" step="0.01" ng-model="changedCompany.OwnMoney" ng-value="changedCompany.OwnMoney">
+                        <a href="#" ng-click="submitChange(node._id)"><i class="fa fa-check-square-o "></i></a>
+                    </div>
+
+                    <div class="col-md-2 col-lg-2 right">
+                        <a href="#" ng-click="addChildCompany(node._id)"><i class="fa fa-plus-square-o"></i></a>
+                        <a href="#" ng-really-message="Are you sure to delete company {{node.Name}} ?" ng-really-click="deleteCompany(node._id, node.ParentId)"><i class="fa fa-times remove"></i></a>
+                    </div>
+                </div>
+                <hr />
+
+        </div>
+        <ul ng-if="node.children">
+            <li ng-repeat="node in node.children" ng-include="'categoryTree'"></li>
+        </ul>
+        </script>
+
+        <ul class="tree">
+            <li ng-repeat="node in roots" ng-include="'categoryTree'"></li>
+        </ul>
+    </div>
+
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3 col-lg-6 col-lg-offset-3">
+                <button class="btn btn-block btn-root" ng-click="addChildCompany(company.ParentId)">Add Root Company</button>
+            </div>
+        </div>
+        <hr class="styleHR">
+
+    </div>
+</div>

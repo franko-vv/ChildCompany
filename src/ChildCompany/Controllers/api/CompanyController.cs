@@ -4,52 +4,60 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Mvc;
 using ChildCompany.Models;
-
-// For more information on enabling Web API for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+using Microsoft.Data.Entity;
+using System.Collections;
+using System.Net;
+using System.Data.SqlClient;
+using ChildCompany.DAL.EntityFramework;
+using ChildCompany.DAL.Models;
 
 namespace ChildCompany.Controllers.api
 {
-    [Route("api/companyinfo")]
+    [Route("/companies")]
     public class CompanyController : Controller
     {
-        private CompanyContext _context;
+        private IUnitOfWork _repository;
 
-        public CompanyController(CompanyContext context)
+        public CompanyController(IUnitOfWork repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
         [HttpGet]
         public JsonResult Get()
         {
-            var cc = _context.Companies.SelectMany(c => c.ChildCompanies);
+            var companies = _repository.Companies.GetAll();
 
-            return Json(cc);
+            Response.StatusCode = (int)HttpStatusCode.Created;
+            return Json(companies);
         }
 
-        // GET api/values/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public JsonResult Get(int id)
         {
-            return "value";
-        }
+            var companyById = _repository.Companies.Get(id);
 
-        // POST api/values
+            Response.StatusCode = (int)HttpStatusCode.Created;
+            return Json(companyById);
+        }
+        
         [HttpPost]
-        public void Post([FromBody]string value)
+        public JsonResult Post([FromBody]Company newCompany)
         {
+            Response.StatusCode = (int)HttpStatusCode.Created;
+            return Json(newCompany);
         }
-
-        // PUT api/values/5
+        
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
+        public JsonResult Put(int id, [FromBody]string value)
         {
+            return Json(null);
         }
-
-        // DELETE api/values/5
+        
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public JsonResult Delete(int id)
         {
+            return Json(null);
         }
     }
 }

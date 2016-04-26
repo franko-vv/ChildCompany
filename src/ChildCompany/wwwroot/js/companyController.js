@@ -7,9 +7,8 @@
 
     angular.module("app", []).controller("companyController", companyController);
 
-    function companyController($scope, $http, arrayService, childSummaService) {
+    function companyController($scope, $http, arrayService, companyApiFactory) {
 
-        var arrayCompanies = [];			// FOR GET REQUEST
         var moneyChildDict = [];			// ARRAY FOR CHILD MONEY -- Company ID - CHILD MONEY
         $scope.companiesAllInfo = [];		// ARRAYCOMPANIES + CHILD MONEY
         var currentParentTable = [];		// arrayCompanies - DUPLICATE (for table view)
@@ -23,9 +22,9 @@
 
         // REFRESH VIEW
         var refresh = function () {
-            $http.get('/companies')
+            companyApiFactory.getCompanies()
 			    .then(function (response) {
-			        arrayCompanies = response.data;
+			        $scope.companiesAllInfo = response.data;
 			    }, function (err) {
 			        $scope.errorMessage = err.data;
 			    }).finally(function () {
@@ -42,7 +41,7 @@
         // API GET:{id} FOR TABLE VIEW GET COMPANY BY ID TO INSERT INTO INPUT BOXES
         $scope.editCompany = function (id) {
             $scope.isLoading = true;
-            $http.get('/companies/' + id)
+            companyApiFactory.getCompany(id)
 			    .then(function (response) {
 			        $scope.company = response.data;
 			    }, function (err) {
@@ -60,7 +59,7 @@
             var childCompany = company || {};
             childCompany.parentId = id;
 
-            $http.post('/companies', childCompany)
+            companyApiFactory.insertCompany(childCompany)
 			    .then(function (response) {
 			        $scope.companiesAllInfo.push(response.data);
 			        $scope.company = {};
@@ -76,7 +75,8 @@
         // API PUT EDIT COMPANY --- FROM TABLE
         $scope.updateCompany = function (id) {
             $scope.isLoading = true;
-            $http.put('/companies/' + id, $scope.company)
+            $scope.company.id = id;
+            companyApiFactory.updateCompany($scope.company)
 			    .then(function (response) {
 			        refresh();
 			        //clear input fields
@@ -96,7 +96,7 @@
             var item = getItemByIdService.getItem(arrayCompanies, id, id);
             var index = arrayCompanies.indexOf(item);
 
-            $http.put('/companies/' + id, $scope.changedCompany)
+            companyApiFactory.updateCompany($scope.changedCompany)
 			    .then(function (response) {
 			        closeEditMode(id);
 			        arrayCompanies[index].ownMoney = $scope.changedCompany.ownMoney;
@@ -123,7 +123,7 @@
                 var newItem = getItemByIdService.getItem(arrayCompanies, id, childElementId[i]);
                 newItem.parentId = parentId;
                 // Update child
-                $http.put('/companies/' + newItem.id, newItem)
+                companyApiFactory.updateCompany(newItem)
 				    .then(function (response) { }, function (err) { });
             };
         };
@@ -133,7 +133,7 @@
             $scope.isLoading = true;
             updateChildCompanies(id, parentId);
 
-            $http.delete('/companies/' + id)
+            companyApiFactory.deleteCompany(id)
 			    .then(function (response) {
 			        //location.reload();
 			    }, function (err) {

@@ -3,6 +3,7 @@
 /// <reference path="js/app.js" />
 /// <reference path="js/arrayservice.js" />
 /// <reference path="js/childsummaservice.js" />
+/// <reference path="js/companyapifactory.js" />
 /// <reference path="js/companycontroller.js" />
 /// <reference path="js/confirmdirective.js" />
 /// <reference path="lib/angular/angular.js" />

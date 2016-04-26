@@ -2,7 +2,7 @@
 {
     var arrayService = {};
 
-    // Concatinate two array - primary with foreign
+    // Concatenate two arrays - primary with foreign
     // by key primaryKey = foreignKey
     arrayService.concatTwoArray = function (primary, foreign, primaryKey, foreignKey, select)
     {
@@ -40,13 +40,12 @@
     };
 
     // Get Item from array-globalArr with prop = toFind
-    arrayService.getItem = function (globalArr, prop, toFind)
-    {
+    arrayService.getItem = function (globalArr, prop, toFind) {
         for (var i = globalArr.length - 1; i >= 0; i--) {
             if (globalArr[i].prop === toFind)
                 return globalArr[i];
         };
-    }
+    };
 
     return arrayService;
 })
